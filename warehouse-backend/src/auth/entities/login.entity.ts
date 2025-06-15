@@ -1,8 +1,15 @@
 export class LoginEntity {
-  username: string;
-  email: string;
-  phone: string | null;
-  role_level: number;
-  password: string;
-  userId: string;
+  login_user: {
+    user: {
+      username: string;
+      email: string;
+      phone: string;
+      password: string;
+      user_id: string;
+      role_level: number;
+      is_active: number;
+    };
+    permissions: string[];
+    role_level: number;
+  };
 }

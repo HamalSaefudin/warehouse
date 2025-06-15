@@ -19,24 +19,33 @@ export class AuthService {
 
     const users: LoginEntity[] = await this.entityManager.query(
       `
-      SELECT username, email, phone, role_level, password, user_id
-      FROM users
-      WHERE username = $1
-      LIMIT 1
+        SELECT login_user($1)
       `,
       [username],
     );
-    this.logger.log('users', users);
+    this.logger.log(users);
     const user = users[0];
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    const loginData = user?.login_user; // <- will contain user + permissions
+    const userData = loginData?.user;
+    const permissions = loginData?.permissions;
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, userData.password);
+    if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const payload = {
-      userId: user.userId,
-      username: user.username,
-      role: user.role_level,
+      userId: userData.user_id,
+      username: userData.username,
+      role: userData.role_level,
+      permissions,
     };
 
     const access_token = this.jwtService.sign(payload);
@@ -44,11 +53,11 @@ export class AuthService {
     return {
       access_token,
       user: {
-        userId: user.userId,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        role_level: user.role_level,
+        userId: userData.user_id,
+        username: userData.username,
+        email: userData.email,
+        phone: userData.phone,
+        role_level: loginData.role_level,
       },
     };
   }
