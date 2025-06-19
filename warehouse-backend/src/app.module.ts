@@ -3,8 +3,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { RolePermissionsModule } from './modules/role-permissions/role-permissions.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { BarangModule } from './modules/barang/barang.module';
+import { RefreshTokenModule } from './modules/refresh-token/refresh-token.module';
+import { MasterJenisBarangModule } from './modules/master-jenis-barang/master-jenis-barang.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 
 @Module({
   imports: [
@@ -19,15 +25,22 @@ import { AuthModule } from './auth/auth.module';
         port: +configService.get<number>('DB_PORT')!,
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
+        database: configService.get('DB_DATABASE'),
         entities: [],
-        synchronize: false,
+        autoLoadEntities: true,
+        synchronize: true,
         logging: true,
       }),
     }),
 
     UserModule,
     AuthModule,
+    RolesModule,
+    RolePermissionsModule,
+    BarangModule,
+    RefreshTokenModule,
+    MasterJenisBarangModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
